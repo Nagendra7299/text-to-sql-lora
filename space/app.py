@@ -1,20 +1,15 @@
 import os
 import gradio as gr
-from huggingface_hub import hf_hub_download, list_repo_files
+from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
 
-# Repo holding the GGUF produced by the training notebook.
+# Repo + file produced by the training notebook.
 GGUF_REPO = os.environ.get("GGUF_REPO", "Nagendra729/mistral-7b-text-to-sql-gguf")
-
-# Auto-discover a .gguf file (prefer a Q4_K_M build) so we don't hard-code the filename.
-_files = [f for f in list_repo_files(GGUF_REPO) if f.lower().endswith(".gguf")]
-if not _files:
-    raise RuntimeError(f"No .gguf file found in {GGUF_REPO}. Run the training notebook first.")
-_files.sort(key=lambda f: (0 if "q4_k_m" in f.lower() else 1, len(f)))
-GGUF_FILE = _files[0]
+GGUF_FILE = os.environ.get("GGUF_FILE", "mistral-7b-text-to-sql.Q4_K_M.gguf")
+HF_TOKEN = os.environ.get("HF_TOKEN")  # optional: set as a Space secret if the model is private
 
 print(f"Loading {GGUF_REPO}/{GGUF_FILE} ...")
-model_path = hf_hub_download(repo_id=GGUF_REPO, filename=GGUF_FILE)
+model_path = hf_hub_download(repo_id=GGUF_REPO, filename=GGUF_FILE, token=HF_TOKEN)
 llm = Llama(model_path=model_path, n_ctx=2048, n_threads=2, verbose=False)
 print("Model loaded.")
 
