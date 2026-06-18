@@ -14,10 +14,10 @@ ENV HOME=/home/user \
 WORKDIR /app
 COPY --chown=user requirements.txt .
 
-# Prebuilt CPU wheel for llama-cpp-python (no local compile needed)
-RUN pip install --no-cache-dir --user \
-    --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu \
-    -r requirements.txt
+# Build llama-cpp-python from source against this image's glibc
+# (the prebuilt CPU wheel index ships a musl/Alpine build that won't load on Debian).
+ENV CMAKE_ARGS="-DGGML_NATIVE=OFF"
+RUN pip install --no-cache-dir --user -r requirements.txt
 
 COPY --chown=user . .
 EXPOSE 7860
