@@ -4,7 +4,7 @@ from huggingface_hub import hf_hub_download
 from llama_cpp import Llama
 
 # Repo + file produced by the training notebook.
-GGUF_REPO = os.environ.get("GGUF_REPO", "Nagendra729/mistral-7b-text-to-sql-gguf")
+GGUF_REPO = os.environ.get("GGUF_REPO", "Nagendra729/text-to-sql-gguf-v2")
 GGUF_FILE = os.environ.get("GGUF_FILE", "mistral-7b-text-to-sql.Q4_K_M.gguf")
 HF_TOKEN = os.environ.get("HF_TOKEN")  # optional: set as a Space secret if the model is private
 
