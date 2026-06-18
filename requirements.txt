@@ -1,0 +1,10 @@
+# Reference deps for the training notebook (Colab installs these inline).
+# Pin-light on purpose — Unsloth pulls compatible torch/transformers/peft/trl.
+unsloth
+trl
+peft
+transformers
+datasets
+bitsandbytes
+accelerate
+huggingface_hub
