@@ -2,7 +2,55 @@
 
 > Fine-tune a 7-billion-parameter LLM to turn plain-English questions into SQL queries — trained on a single free GPU using QLoRA.
 
-**[Live Demo](https://huggingface.co/spaces/Nagendra729/text-to-sql)** · **[Adapter on HF Hub](https://huggingface.co/Nagendra729/mistral-7b-text-to-sql-lora)** · **[Training Notebook](./train_mistral_sql_qlora.ipynb)**
+**[Adapter on HF Hub](https://huggingface.co/Nagendra729/mistral-7b-text-to-sql-lora)** · **[Training Notebook](./train_mistral_sql_qlora.ipynb)** · **[Try it in Colab](#-demo)**
+
+---
+
+## 🎬 Demo
+
+<!-- Record the snippet below running and drop the GIF here:
+     1. Run the "Try it yourself" cell in Colab
+     2. Screen-record it generating SQL for 2-3 questions
+     3. Convert to GIF (e.g. ezgif.com) and save as assets/demo.gif
+     4. Uncomment the line below -->
+<!-- ![Text-to-SQL demo](assets/demo.gif) -->
+
+> **GIF coming soon** — record the model converting English → SQL in real time (see snippet below).
+
+### Try it yourself (free, no setup)
+
+Paste into a [Google Colab](https://colab.research.google.com) cell (Runtime → T4 GPU) and run — the adapter is public, no token needed:
+
+```python
+!pip install -q unsloth
+from unsloth import FastLanguageModel
+
+model, tok = FastLanguageModel.from_pretrained(
+    "Nagendra729/mistral-7b-text-to-sql-lora",
+    max_seq_length=2048, load_in_4bit=True)
+FastLanguageModel.for_inference(model)
+
+def ask(schema, question):
+    p = (f"You are a precise text-to-SQL engine. Given a database schema and a "
+         f"question, output ONLY the SQL query.\n\n### Schema:\n{schema}\n\n"
+         f"### Question:\n{question}\n\n### SQL:\n")
+    out = model.generate(**tok(p, return_tensors="pt").to("cuda"),
+                         max_new_tokens=128, do_sample=False)
+    print(tok.decode(out[0], skip_special_tokens=True).split("### SQL:")[-1].strip())
+
+ask("CREATE TABLE employees (id INT, name TEXT, department TEXT, salary INT)",
+    "average salary in the engineering department")
+ask("CREATE TABLE orders (id INT, customer TEXT, amount INT, status TEXT)",
+    "list customers with pending orders over 500")
+```
+
+Expected output:
+```sql
+SELECT AVG(salary) FROM employees WHERE department = 'engineering'
+SELECT customer FROM orders WHERE status = 'pending' AND amount > 500
+```
+
+> A base-vs-fine-tuned comparison (exact-match score + side-by-side SQL) is generated in the [training notebook](./train_mistral_sql_qlora.ipynb), section 7.
 
 ---
 
